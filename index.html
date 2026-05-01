@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram DM Viewer</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <section id="upload-screen" class="upload-screen">
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone__inner">
+            <div class="drop-zone__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" />
+              </svg>
+            </div>
+            <h1>Instagram DM Viewer</h1>
+            <p>Drop your Instagram data <code>.zip</code> here, or click to choose files.</p>
+            <p class="hint">Multi-part export? Select all parts at once (<code>part_1</code>, <code>part_2</code>, …).</p>
+            <p class="hint">Everything runs in your browser. Nothing is uploaded.</p>
+            <input id="file-input" type="file" accept=".zip,application/zip" multiple hidden />
+            <button id="choose-file" class="btn btn--primary" type="button">Choose ZIP file(s)</button>
+          </div>
+          <div id="load-progress" class="load-progress" hidden>
+            <div class="load-progress__bar"><div id="load-progress-fill" class="load-progress__fill"></div></div>
+            <div id="load-progress-label" class="load-progress__label">Reading ZIP…</div>
+            <ul id="load-progress-list" class="load-progress__list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="viewer" class="viewer" hidden>
+        <aside id="sidebar" class="sidebar">
+          <header class="sidebar__header">
+            <button id="back-btn" class="icon-btn" type="button" title="Load another ZIP">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            </button>
+            <h2 class="sidebar__title">Messages</h2>
+          </header>
+          <div class="sidebar__search">
+            <input id="convo-search" type="search" placeholder="Search" />
+          </div>
+          <div id="conversation-list" class="conversation-list" tabindex="0"></div>
+        </aside>
+
+        <main id="chat" class="chat">
+          <div id="chat-empty" class="chat__empty">
+            <p>Select a conversation</p>
+          </div>
+          <div id="chat-active" class="chat__active" hidden>
+            <header id="chat-header" class="chat__header"></header>
+            <div class="chat__searchbar">
+              <input id="chat-search" type="search" placeholder="Search this thread" />
+              <span id="chat-search-meta" class="chat__search-meta"></span>
+              <button id="chat-search-prev" class="icon-btn" type="button" title="Previous match" disabled>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+              </button>
+              <button id="chat-search-next" class="icon-btn" type="button" title="Next match" disabled>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+            <div id="chat-viewport" class="chat__viewport">
+              <div id="chat-spacer-top" class="chat__spacer"></div>
+              <div id="chat-items" class="chat__items"></div>
+              <div id="chat-spacer-bottom" class="chat__spacer"></div>
+            </div>
+          </div>
+        </main>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
