@@ -1,88 +1,84 @@
-# Instagram DM Viewer
+# instagram dm viewer
 
-**[→ Try the live demo](https://devfaraaz.github.io/instagram-dm-viewer/)** · No install, no signup, no upload. Drop in your Instagram data `.zip` and the file never leaves your browser.
+instagram gives you your data and no way to read it.
+
+so i built the way to read it.
+
+**[→ try it](https://devfaraaz.github.io/instagram-dm-viewer/)** · no install, no signup, nothing uploaded.
 
 <p align="center">
   <a href="https://devfaraaz.github.io/instagram-dm-viewer/">
-    <img src="docs/demo.gif" alt="Instagram DM Viewer demo" width="900"/>
+    <img src="docs/demo.gif" alt="instagram dm viewer demo" width="900"/>
   </a>
 </p>
 
-A 100% client-side viewer for your Instagram data export. Browse your DMs in an Instagram-style chat UI. Nothing is uploaded — everything runs locally.
+[![stars](https://img.shields.io/github/stars/DevFaraaz/instagram-dm-viewer?style=social)](https://github.com/DevFaraaz/instagram-dm-viewer/stargazers) [![mit](https://img.shields.io/badge/license-mit-blue.svg)](./LICENSE) [![vite](https://img.shields.io/badge/built%20with-vite-646cff.svg)](https://vitejs.dev/)
 
-Supports both export formats Instagram offers (**JSON** and **HTML**), multi-part exports (`part_1`, `part_2`, …), photos / videos / voice messages, reactions, and per-thread search.
+---
 
-[![Stars](https://img.shields.io/github/stars/DevFaraaz/instagram-dm-viewer?style=social)](https://github.com/DevFaraaz/instagram-dm-viewer/stargazers) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE) [![Built with Vite](https://img.shields.io/badge/built%20with-vite-646cff.svg)](https://vitejs.dev/)
+your data is yours. it should belong to you in a form you can actually use.
 
-## Why
+drop your instagram export `.zip(s)` onto the page and your dms render in the chat ui you already know. left-gray bubbles. right-blue bubbles. photos, voice notes, videos, reactions, per-thread search. all of it.
 
-Instagram lets you download your data, but the result is a folder of raw JSON or HTML files that's painful to read. This tool gives you the chat UI Instagram itself doesn't ship.
+nothing leaves your browser. there is no backend. you can verify by opening devtools and watching the network tab — it goes silent.
 
-## Features
+works with multi-gigabyte exports. works with multi-part exports. works with both formats instagram ships (json and html — the viewer auto-detects per thread).
 
-- **Drop-and-go** — select all parts of your export at once; everything stays local
-- **Streaming ZIP read** — uses [fflate](https://github.com/101arrowz/fflate) with a worker so the UI stays responsive on multi-GB exports
-- **Variable-height virtual list** — only the visible messages render, so 100k+ message threads scroll smoothly
-- **Both formats** — automatically detects whether each thread is JSON or HTML and parses accordingly
-- **Lazy media** — photos / videos / audio are decoded on demand from the in-memory ZIP and freed when you leave a thread
-- **Per-thread search** with match navigation and highlight
-- **Conversation sidebar** sorted by most recent activity, with title / participant / preview filtering
-- **Instagram-style dark theme** — left-gray / right-blue bubbles, date separators, sticky header, lightbox on photo click
-- **UTF-8 mojibake fix** — undoes the Latin-1-encoded UTF-8 mangling that IG ships in its JSON exports
+---
 
-## Quick start
+## run it locally
 
-```bash
+```
 npm install
-npm run dev      # localhost:5173
+npm run dev
 ```
 
-Then drop your Instagram export `.zip` (or all parts of a multi-part export) onto the page.
+build it:
 
-To build:
-```bash
+```
 npm run build
-npm run preview
 ```
 
-## How to get your Instagram export
+## get your data from instagram
 
-1. Instagram → **Accounts Center** → **Your information and permissions** → **Download your information**
-2. Pick **JSON** or **HTML** (this viewer supports either; JSON tends to be a bit smaller)
-3. Wait 1–2 days for Instagram to email you the download link
-4. Download all parts (very large exports get split into multiple `.zip`s)
+accounts center → your information and permissions → download your information. pick json or html, either works. wait 1–2 days for the email. download every part if it's split.
 
-## Architecture
+---
 
-```
-src/
-├── main.js              # entry: drag-and-drop, progress UI, screen routing
-├── zipManager.js        # streams ZIP → Map<path, Uint8Array> via fflate's AsyncUnzipInflate
-├── conversationList.js  # scans messages/inbox/*; cheap byte-level extraction for sidebar metadata
-├── chatViewer.js        # parses selected thread, renders bubbles, in-thread search
-├── htmlParser.js        # IG HTML format → normalized message records
-├── virtualList.js       # binary-search offsets + measured-height cache
-├── mediaLoader.js       # blob-URL cache, basename fallback resolver
-├── utils.js             # encoding fix, time/date formatting, mime sniffing
-└── styles.css
-```
+## under the hood
 
-### Performance notes
+a few things i think are interesting.
 
-- ZIP reading uses fflate's streaming `Unzip` so the original buffer never has to live fully in memory.
-- Decompression runs in a worker (`AsyncUnzipInflate`) so the UI stays interactive while the bytes flow through.
-- Indexing decodes only the **first 256 KB** of each thread file. Title / participants / first message all live near the top, so per-conversation indexing is constant-time regardless of thread size.
-- Full thread parsing happens lazily, only when a conversation is opened.
-- The virtual list re-measures heights on render and adjusts scrollTop so growing items above the viewport don't cause visible jumps.
+**streaming zip read** via fflate's `AsyncUnzipInflate`. the raw zip buffer never has to live fully in memory; bytes flow through a worker. ui stays interactive while gigabytes decompress.
 
-### Memory caveat
+**variable-height virtual list.** measured-height cache + binary-search offset lookup. heights re-measure after each render pass and `scrollTop` is adjusted so growing items above the viewport don't cause visible jumps. 100k+ message threads scroll smooth.
 
-Decompressed ZIP bytes are held in the JS heap as `Uint8Array`s. On desktop Chrome with ≥16 GB RAM this is fine for exports up to ~5 GB. Mobile browsers (1–2 GB heap caps) and very large exports (10+ GB) will hit memory limits. If you need that, the right next step is moving media to on-demand reads from the source `File` via `Blob.slice` + per-entry inflate, which keeps resident memory in the tens of MB regardless of export size.
+**sidebar indexing without `JSON.parse`.** each thread file's first 256 kb gets decoded, title and first message get pulled with regex, then only that first ~few-hundred-byte message object gets `JSON.parse`'d. constant time per conversation regardless of how chatty the thread is. **973 conversations across a 4.4 gb export indexes in ~2 seconds.**
 
-## Privacy
+**two formats.** instagram ships some users json, some users html. the viewer detects per thread and dispatches to the right parser. all downstream code (sidebar, virtual list, media, search) sees one normalized message record either way.
 
-Everything runs locally. The page makes **no network requests** with your data. You can verify by loading it offline or checking the Network tab in DevTools.
+**utf-8 mojibake fix.** instagram's json exports double-encode utf-8 as latin-1. emojis arrive as `Ã©`. one line: reinterpret each char code as a raw byte, decode the resulting buffer as utf-8. done.
 
-## License
+---
 
-MIT — see [LICENSE](./LICENSE).
+## what's not done
+
+decompressed bytes sit in the js heap. that's fine on desktop chrome with 16+ gb of ram for exports up to ~5 gb. mobile browsers (1–2 gb heap caps) or larger exports will oom.
+
+the fix is moving media to on-demand reads from the source `File` via `Blob.slice` + per-entry inflate. keeps resident memory in the tens of megabytes regardless of export size. issue is open. happy to take a pr.
+
+---
+
+## privacy
+
+zero network requests with your data. zero. the page works fully offline once loaded — drop the .zip, browse, close the tab. nothing persists, nothing transmits, nothing analyzes.
+
+if you don't trust me, fork it. read the code (it's small). host it yourself. or use it once on an offline machine. it's all the same to me.
+
+---
+
+## license
+
+mit. fork it. ship something better. tell me about it.
+
+— [@DevFaraaz](https://github.com/DevFaraaz)
