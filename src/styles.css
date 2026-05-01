@@ -142,6 +142,21 @@ code {
   background: var(--accent-hover);
 }
 
+.sample-hint {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.sample-link {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.sample-link:hover {
+  text-decoration: underline;
+}
+
 .load-progress {
   margin-top: 24px;
 }

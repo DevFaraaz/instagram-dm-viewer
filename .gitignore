@@ -6,3 +6,4 @@ dist
 .env
 .env.local
 .claude
+public/sample-export.zip

@@ -2,6 +2,12 @@
 
 **[→ Try the live demo](https://devfaraaz.github.io/instagram-dm-viewer/)** · No install, no signup, no upload. Drop in your Instagram data `.zip` and the file never leaves your browser.
 
+<p align="center">
+  <a href="https://devfaraaz.github.io/instagram-dm-viewer/">
+    <img src="docs/demo.gif" alt="Instagram DM Viewer demo" width="900"/>
+  </a>
+</p>
+
 A 100% client-side viewer for your Instagram data export. Browse your DMs in an Instagram-style chat UI. Nothing is uploaded — everything runs locally.
 
 Supports both export formats Instagram offers (**JSON** and **HTML**), multi-part exports (`part_1`, `part_2`, …), photos / videos / voice messages, reactions, and per-thread search.

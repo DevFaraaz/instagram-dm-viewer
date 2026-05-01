@@ -12,6 +12,7 @@ const dom = {
   loadProgressFill: document.getElementById('load-progress-fill'),
   loadProgressLabel: document.getElementById('load-progress-label'),
   loadProgressList: document.getElementById('load-progress-list'),
+  trySample: document.getElementById('try-sample'),
 
   viewer: document.getElementById('viewer'),
   backBtn: document.getElementById('back-btn'),
@@ -229,6 +230,26 @@ dom.fileInput.addEventListener('change', (e) => {
   const files = e.target.files;
   if (files && files.length) handleFiles(files);
 });
+
+if (dom.trySample) {
+  dom.trySample.addEventListener('click', async (e) => {
+    e.preventDefault();
+    dom.trySample.textContent = 'Loading sample…';
+    try {
+      // Vite serves files in public/ at the BASE_URL root for both dev and prod.
+      const url = `${import.meta.env.BASE_URL}sample-export.zip`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const file = new File([blob], 'sample-export.zip', { type: 'application/zip' });
+      handleFiles([file]);
+    } catch (err) {
+      console.error(err);
+      alert('Could not load sample data: ' + err.message);
+      dom.trySample.textContent = 'Try with sample data';
+    }
+  });
+}
 
 ['dragenter', 'dragover'].forEach((ev) => {
   dom.dropZone.addEventListener(ev, (e) => {

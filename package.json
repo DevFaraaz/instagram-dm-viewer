@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sample": "node scripts/generate-sample-zip.mjs",
+    "predev": "node scripts/generate-sample-zip.mjs",
+    "prebuild": "node scripts/generate-sample-zip.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.2"
